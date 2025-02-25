@@ -87,14 +87,24 @@ def login_page():
 def admin_page():
   page = request.args.get('page', 1, type=int)
   q = request.args.get('q', default='', type=str)
-  todos = current_user.search_todos(q, page)
-  return render_template('admin.html', todos=todos, page=page, q=q)
+  done = request.args.get('done', default='any', type=str)
+  todos = current_user.search_todos(q, done, page)
+  return render_template('admin.html', todos=todos, q=q, page=page, done=done)
 
 @app.route('/app', methods=['GET'])
 @jwt_required()
 def todos_page():
   return render_template('todo.html', current_user=current_user)
 
+@app.route('/todo-stats', methods=["GET"])
+@login_required(Admin)
+def todo_stats():
+  return jsonify(current_user.get_todo_stats())
+
+@app.route('/stats')
+@login_required(Admin)
+def stats_page():
+  return render_template('stats.html')
 
 @app.route('/signup', methods=['GET'])
 def signup_page():
